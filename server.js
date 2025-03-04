@@ -10,8 +10,14 @@ app.use(cors());
 app.use(express.json());
 
 const getData = () => {
-  const data = fs.readFileSync("data.json");
-  return JSON.parse(data);
+  try {
+    const dataPath = path.join(__dirname, "data.json"); // Absolute path
+    const data = fs.readFileSync(dataPath, "utf-8");
+    return JSON.parse(data);
+  } catch (error) {
+    console.error("Error reading data.json:", error);
+    return [];
+  }
 };
 
 app.get("/api/data", (req, res) => {
