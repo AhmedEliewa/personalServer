@@ -12,6 +12,7 @@ app.use(express.json());
 const getData = () => {
   try {
     const dataPath = path.join(__dirname, "data.json"); // Absolute path
+    console.log("Loading data from:", dataPath); // Debugging
     const data = fs.readFileSync(dataPath, "utf-8");
     return JSON.parse(data);
   } catch (error) {
