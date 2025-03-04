@@ -12,7 +12,6 @@
 // const getData = () => {
 //   try {
 //     const dataPath = path.join(__dirname, "data.json"); // Absolute path
-//     console.log("Loading data from:", dataPath); // Debugging
 //     const data = fs.readFileSync(dataPath, "utf-8");
 //     return JSON.parse(data);
 //   } catch (error) {
@@ -57,6 +56,9 @@
 // // });
 // // to deploy on vercel
 // module.exports = app;
+
+// ✅ Export app for Vercel
+
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
@@ -68,38 +70,58 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Debugging: Log if `data.json` exists in Vercel
+// Debugging: Log if `data.json` exists in Vercel
 const dataPath = path.join(__dirname, "data.json");
 console.log("Checking data.json at:", dataPath);
 
-if (!fs.existsSync(dataPath)) {
-  console.error("🚨 ERROR: data.json NOT FOUND!");
-} else {
-  console.log("✅ data.json exists.");
-}
-
-// ✅ Load JSON Data Safely
+// Load JSON Data Safely
 const getData = () => {
   try {
-    if (!fs.existsSync(dataPath)) {
-      console.error("🚨 ERROR: data.json NOT FOUND inside function!");
-      return [];
-    }
-
     const data = fs.readFileSync(dataPath, "utf-8");
-    console.log("✅ Successfully loaded data.json");
+    console.log(" Successfully loaded data.json");
     return JSON.parse(data);
   } catch (error) {
-    console.error("🚨 ERROR reading data.json:", error);
+    console.error(" ERROR reading data.json:", error);
     return [];
   }
 };
-
 // API Routes
 app.get("/api/data", (req, res) => {
   const data = getData();
   res.json(data);
 });
 
-// ✅ Export app for Vercel
+app.get("/api/data/random", (req, res) => {
+  const data = getData();
+  if (data.length === 0) {
+    res.status(404).json({ message: "No data found" });
+  } else {
+    const randomIndex = Math.floor(Math.random() * data.length);
+    res.json(data[randomIndex]);
+  }
+});
+
+app.get("/api/data/randoms", (req, res) => {
+  const data = getData();
+  if (data.length === 0) {
+    res.status(404).json({ message: "No data found" });
+  } else {
+    const randomIndex = Math.floor(Math.random() * data.length);
+    const randoms = data.slice(randomIndex, randomIndex + 10);
+    res.json(randoms);
+  }
+});
+
+app.get("/api/data/:id", (req, res) => {
+  const data = getData();
+  const item = data.find((item) => item.id === parseInt(req.params.id));
+
+  if (item) {
+    res.json(item);
+  } else {
+    res.status(404).json({ message: "Item not found" });
+  }
+});
+
+// Export app for Vercel
 module.exports = app;
